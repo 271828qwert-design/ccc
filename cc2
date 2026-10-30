@@ -1,0 +1,187 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <limits>
+
+using namespace std;
+
+// ================= 用户类 (User) =================
+class User {
+private:
+    string userId;     // 用户编号
+    string userName;   // 姓名
+    string contact;    // 联系方式
+
+public:
+    // 构造函数
+    User(string id, string name, string contact) {
+        this->userId = id;
+        this->userName = name;
+        this->contact = contact;
+    }
+    
+    // 成员函数：显示用户信息
+    void display() const {
+        cout << "用户编号: " << userId 
+             << " | 姓名: " << userName 
+             << " | 联系方式: " << contact << endl;
+    }
+    
+    // 成员函数：获取编号（用于查重）
+    string getId() const {
+        return userId;
+    }
+};
+
+
+// ================= 包裹类 (Parcel) =================
+class Parcel {
+private:
+    string parcelId;   // 包裹编号
+    string goodsName;  // 物品名称
+    string status;     // 当前状态
+
+public:
+    // 构造函数
+    Parcel(string id, string goodsName) {
+        this->parcelId = id;
+        this->goodsName = goodsName;
+        this->status = "已创建"; // 默认状态
+    }
+    
+    // 成员函数：显示包裹信息
+    void display() const {
+        cout << "包裹编号: " << parcelId 
+             << " | 物品名称: " << goodsName 
+             << " | 当前状态: " << status << endl;
+    }
+    
+    // 成员函数：获取编号（用于查重）
+    string getId() const {
+        return parcelId;
+    }
+};
+
+
+// ================= 辅助工具函数 =================
+
+// 清空输入缓冲区，防止输入非数字导致死循环
+void clearInput() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+// 检查用户编号是否重复
+bool isUserIdExist(const vector<User>& users, const string& id) {
+    for (const auto& u : users) {
+        if (u.getId() == id) return true;
+    }
+    return false;
+}
+
+// 检查包裹编号是否重复
+bool isParcelIdExist(const vector<Parcel>& parcels, const string& id) {
+    for (const auto& p : parcels) {
+        if (p.getId() == id) return true;
+    }
+    return false;
+}
+
+
+// ================= 主函数 =================
+int main() {
+    vector<User> users;     // 存储所有用户对象
+    vector<Parcel> parcels; // 存储所有包裹对象
+    int choice = -1;
+
+    while (true) {
+        cout << "\n===== 智慧物流与配送模拟系统 =====" << endl;
+        cout << "1. 创建用户" << endl;
+        cout << "2. 显示所有用户" << endl;
+        cout << "3. 创建包裹" << endl;
+        cout << "4. 显示所有包裹" << endl;
+        cout << "0. 退出系统" << endl;
+        cout << "请选择操作编号: ";
+
+        // 【T3 测试点】非法菜单项处理（输入字母或特殊字符）
+        if (!(cin >> choice)) {
+            cout << "[错误] 输入格式错误，请输入数字菜单项！" << endl;
+            clearInput(); // 清理错误状态
+            continue;
+        }
+
+        switch (choice) {
+            case 1: {
+                string id, name, contact;
+                cout << "请输入用户编号: ";
+                cin >> id;
+                
+                // 【T3 测试点】基础数据校验：不能为空、不能重复
+                if (id.empty() || isUserIdExist(users, id)) {
+                    cout << "[错误] 用户编号不能为空且不能重复！创建失败。" << endl;
+                    break;
+                }
+                
+                cout << "请输入姓名: ";
+                cin >> name;
+                cout << "请输入联系方式: ";
+                cin >> contact;
+                
+                // 创建对象并存入 vector
+                users.push_back(User(id, name, contact)); 
+                cout << "[成功] 用户创建成功！" << endl;
+                break;
+            }
+            case 2: {
+                if (users.empty()) {
+                    cout << "当前没有用户数据。" << endl;
+                } else {
+                    cout << "--- 当前所有用户 ---" << endl;
+                    for (const auto& u : users) {
+                        u.display();
+                    }
+                }
+                break;
+            }
+            case 3: {
+                string id, goods;
+                cout << "请输入包裹编号: ";
+                cin >> id;
+                
+                if (id.empty() || isParcelIdExist(parcels, id)) {
+                    cout << "[错误] 包裹编号不能为空且不能重复！创建失败。" << endl;
+                    break;
+                }
+                
+                cout << "请输入物品名称: ";
+                cin >> goods;
+                
+                // 创建对象并存入 vector
+                parcels.push_back(Parcel(id, goods)); 
+                cout << "[成功] 包裹创建成功！" << endl;
+                break;
+            }
+            case 4: {
+                if (parcels.empty()) {
+                    cout << "当前没有包裹数据。" << endl;
+                } else {
+                    cout << "--- 当前所有包裹 ---" << endl;
+                    for (const auto& p : parcels) {
+                        p.display();
+                    }
+                }
+                break;
+            }
+            case 0: {
+                cout << "感谢使用，系统退出。" << endl;
+                return 0;
+            }
+            default: {
+                // 【T3 测试点】输入了数字但不存在的菜单
+                cout << "[错误] 不存在的菜单号，请重新输入！" << endl;
+                break;
+            }
+        }
+    }
+    return 0;
+}
